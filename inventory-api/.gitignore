@@ -1,0 +1,41 @@
+# Gradle
+.gradle
+/build/
+
+# OpenAPI Generated Code (Generated at build time)
+src/main/resources/static/docs/api/v*/inventory-api.yaml
+build/generated/
+
+# Java / IDE
+*.class
+*.log
+*.jar
+*.war
+*.ear
+.project
+.classpath
+.settings/
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+!.vscode/settings.json
+bin/
+
+# Environment and Secrets
+.env
+*.properties
+!src/main/resources/*.properties
+!src/test/resources/*.properties
+*.yml
+!src/main/resources/*.yml
+!src/test/resources/*.yml
+!k8s/*.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testcontainers / Docker local
+.testcontainers.properties

@@ -1,0 +1,8 @@
+spring:
+  config:
+    activate:
+      on-profile: k8s
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://mariadb-svc.inventory:3306/inventory_db}
+    username: ${SPRING_DATASOURCE_USERNAME:orcmes}
+    password: ${SPRING_DATASOURCE_PASSWORD:P@ssw0rd}

@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: Inventory API
+  description: API specification for internal asset and inventory management (API-First Approach)
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: Current Host (v1)
+
+paths:
+  /items:
+    get:
+      tags:
+        - Item Management
+      summary: List all items
+      operationId: getAllItems
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemResponse'
+    post:
+      tags:
+        - Item Management
+      summary: Create a new item
+      operationId: createItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemRequest'
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+
+  /items/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags:
+        - Item Management
+      summary: Get item details
+      operationId: getItemById
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Item Management
+      summary: Update item details
+      operationId: updateItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemRequest'
+      responses:
+        '200':
+          description: Updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Item Management
+      summary: Delete an item
+      operationId: deleteItem
+      responses:
+        '204':
+          description: Deleted successfully
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          example: "I001"
+        errorMessage:
+          type: string
+          example: "Item Not Found"
+        errorDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+    ErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+          description: "The name of the field where the error occurred"
+          example: "name"
+        value:
+          type: string
+          description: "The rejected input value"
+          example: ""
+        reason:
+          type: string
+          description: "Reason for the error"
+          example: "Name is required"
+    ItemRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "MacBook Pro 16"
+        category:
+          type: string
+          example: "Laptop"
+        status:
+          type: string
+          example: "In Stock"
+        location:
+          type: string
+          example: "Warehouse A"
+    ItemResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        location:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
