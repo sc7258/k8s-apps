@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+images:
+  - name: inventory-api
+    newName: harbor.prod.test/library/inventory-api
+    newTag: v1
+
+# PROD 환경은 트래픽을 고려하여 파드 3개
+replicas:
+  - name: inventory-api
+    count: 3

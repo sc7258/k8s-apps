@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: inventory-api
-        image: inventory-api:v1
+        image: inventory-api
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
