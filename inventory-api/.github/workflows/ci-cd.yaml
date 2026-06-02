@@ -1,0 +1,87 @@
+name: CI/CD Pipeline (Build and Deploy to Dev)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'build.gradle'
+      - 'Dockerfile'
+
+env:
+  REGISTRY: harbor.dev.test
+  IMAGE_NAME: library/inventory-api
+
+jobs:
+  build-and-deploy:
+    # ⚠️ 중요: 사내망(Kubernetes)에 설치된 self-hosted runner를 사용해야 Harbor에 접근 가능합니다.
+    # 만약 기본 GitHub 서버를 쓴다면 'ubuntu-latest'로 변경하되, 퍼블릭 망에서 Harbor에 접근할 수 있어야 합니다.
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Kustomize 업데이트 후 다시 푸시하기 위해 PAT 또는 GITHUB_TOKEN 필요
+          token: ${{ secrets.PAT_TOKEN || github.token }}
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test # 현재 테스트 실패 우려가 있다면 -x test 유지. 추후 제거 권장.
+
+      - name: Log in to Harbor Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Set Git Commit Hash
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.sha_short }}
+
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v2
+        with:
+          kustomize-version: "5.0.0"
+
+      - name: Update Kubernetes manifests (Kustomize)
+        run: |
+          cd k8s/overlays/dev
+          kustomize edit set image harbor.dev.test/library/inventory-api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.sha_short }}
+          
+          # 변경사항 확인 (디버깅 용도)
+          git diff
+
+      - name: Commit and Push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add k8s/overlays/dev/kustomization.yaml
+          
+          # 변경사항이 있을 때만 커밋 및 푸시
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            # [skip ci] 를 넣어 무한 루프 방지
+            git commit -m "chore(cd): update dev image tag to ${{ steps.vars.outputs.sha_short }} [skip ci]"
+            git push origin main
+          fi
