@@ -9,7 +9,7 @@ resources:
 images:
   - name: inventory-api
     newName: harbor.local.test/library/inventory-api
-    newTag: v999.9.9
+    newTag: v1.0.0
 
 # 필요한 경우 로컬 환경에만 적용할 설정(예: Replicas 1개)
 replicas:
