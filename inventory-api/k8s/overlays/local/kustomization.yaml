@@ -3,6 +3,8 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - httproute.yaml
+  - httproute-domain.yaml
 
 images:
   - name: inventory-api

@@ -10,7 +10,7 @@ on:
       - 'Dockerfile'
 
 env:
-  REGISTRY: harbor.dev.test
+  REGISTRY: harbor-dev.intelliantech.com
   IMAGE_NAME: library/inventory-api
 
 jobs:
@@ -65,7 +65,7 @@ jobs:
       - name: Update Kubernetes manifests (Kustomize)
         run: |
           cd k8s/overlays/dev
-          kustomize edit set image harbor.dev.test/library/inventory-api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.sha_short }}
+          kustomize edit set image harbor-dev.intelliantech.com/library/inventory-api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.sha_short }}
           
           # 변경사항 확인 (디버깅 용도)
           git diff

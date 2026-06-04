@@ -3,10 +3,11 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - httproute.yaml
 
 images:
   - name: inventory-api
-    newName: harbor.dev.test/library/inventory-api
+    newName: harbor-dev.intelliantech.com/library/inventory-api
     newTag: v1
 
 # DEV 환경은 파드 2개
